@@ -13,7 +13,7 @@
 
 #define NR_PARTICLES 512
 // Uncomment this line to show explicit fem deomo
-#define USE_EXPLICIT
+//#define USE_EXPLICIT
 
 std::vector<std::string> get_required_instance_extensions() {
   uint32_t glfw_ext_count = 0;
