@@ -4,8 +4,8 @@
       "tasks": [{
           "type": "serial",
           "range_hint": "",
-          "name": "update_alpha_c76_0_k0016_vk_0_t00",
-          "source_path": "implicit_fem/update_alpha_c76_0_k0016_vk_0_t00.spv",
+          "name": "update_alpha_c78_0_k0018_vk_0_t00",
+          "source_path": "implicit_fem/update_alpha_c78_0_k0018_vk_0_t00.spv",
           "gpu_block_size": 1,
           "buffer_binds": [{
               "buffer": {
@@ -26,8 +26,8 @@
       "tasks": [{
           "type": "serial",
           "range_hint": "",
-          "name": "init_r_2_c74_0_k0015_vk_0_t00",
-          "source_path": "implicit_fem/init_r_2_c74_0_k0015_vk_0_t00.spv",
+          "name": "init_r_2_c76_0_k0017_vk_0_t00",
+          "source_path": "implicit_fem/init_r_2_c76_0_k0017_vk_0_t00.spv",
           "gpu_block_size": 1,
           "buffer_binds": [{
               "buffer": {
@@ -39,12 +39,53 @@
       "args_buffer_size": 0,
       "rets_buffer_size": 0,
       "scalar_args": {},
-      "arr_args": {}},"floor_bound": {
+      "arr_args": {}},"dot2scalar": {
+      "tasks": [{
+          "type": "serial",
+          "range_hint": "",
+          "name": "dot2scalar_c68_0_k0016_vk_0_t00",
+          "source_path": "implicit_fem/dot2scalar_c68_0_k0016_vk_0_t00.spv",
+          "gpu_block_size": 1,
+          "buffer_binds": [{
+              "buffer": {
+                "type": 0,
+                "id": 0},
+              "binding": 2}]},{
+          "type": "range_for",
+          "range_hint": "",
+          "name": "dot2scalar_c68_0_k0016_vk_1_t01",
+          "source_path": "implicit_fem/dot2scalar_c68_0_k0016_vk_1_t01.spv",
+          "gpu_block_size": 128,
+          "buffer_binds": [{
+              "buffer": {
+                "type": 2,
+                "id": -1},
+              "binding": 0},{
+              "buffer": {
+                "type": 0,
+                "id": 0},
+              "binding": 4}]}],
+      "args_count": 2,
+      "rets_count": 0,
+      "args_buffer_size": 16,
+      "rets_buffer_size": 0,
+      "scalar_args": {},
+      "arr_args": {"1": {
+          "dtype_name": "f32",
+          "field_dim": 1,
+          "element_shape": [3],
+          "shape_offset_in_args_buf": 4,
+          "bind_index": 0},"0": {
+          "dtype_name": "f32",
+          "field_dim": 1,
+          "element_shape": [3],
+          "shape_offset_in_args_buf": 0,
+          "bind_index": 0}}},"floor_bound": {
       "tasks": [{
           "type": "range_for",
           "range_hint": "",
-          "name": "floor_bound_c84_0_k0007_vk_0_t00",
-          "source_path": "implicit_fem/floor_bound_c84_0_k0007_vk_0_t00.spv",
+          "name": "floor_bound_c88_0_k0008_vk_0_t00",
+          "source_path": "implicit_fem/floor_bound_c88_0_k0008_vk_0_t00.spv",
           "gpu_block_size": 128,
           "buffer_binds": [{
               "buffer": {
@@ -66,12 +107,110 @@
           "field_dim": 1,
           "element_shape": [3],
           "shape_offset_in_args_buf": 0,
-          "bind_index": 0}}},"get_force": {
+          "bind_index": 0}}},"init_x": {
       "tasks": [{
           "type": "range_for",
+          "range_hint": "",
+          "name": "init_x_c84_0_k0005_vk_0_t00",
+          "source_path": "implicit_fem/init_x_c84_0_k0005_vk_0_t00.spv",
+          "gpu_block_size": 128,
+          "buffer_binds": [{
+              "buffer": {
+                "type": 2,
+                "id": -1},
+              "binding": 0},{
+              "buffer": {
+                "type": 0,
+                "id": 0},
+              "binding": 2}]}],
+      "args_count": 1,
+      "rets_count": 0,
+      "args_buffer_size": 8,
+      "rets_buffer_size": 0,
+      "scalar_args": {},
+      "arr_args": {"0": {
+          "dtype_name": "f32",
+          "field_dim": 1,
+          "element_shape": [3],
+          "shape_offset_in_args_buf": 0,
+          "bind_index": 0}}},"update_beta_r_2": {
+      "tasks": [{
+          "type": "serial",
+          "range_hint": "",
+          "name": "update_beta_r_2_c80_0_k0019_vk_0_t00",
+          "source_path": "implicit_fem/update_beta_r_2_c80_0_k0019_vk_0_t00.spv",
+          "gpu_block_size": 1,
+          "buffer_binds": [{
+              "buffer": {
+                "type": 0,
+                "id": 0},
+              "binding": 2}]}],
+      "args_count": 1,
+      "rets_count": 0,
+      "args_buffer_size": 8,
+      "rets_buffer_size": 0,
+      "scalar_args": {},
+      "arr_args": {"0": {
+          "dtype_name": "f32",
+          "field_dim": 0,
+          "element_shape": [],
+          "shape_offset_in_args_buf": 0,
+          "bind_index": 0}}},"get_b": {
+      "tasks": [{
+          "type": "range_for",
+          "range_hint": "",
+          "name": "get_b_c70_0_k0010_vk_0_t00",
+          "source_path": "implicit_fem/get_b_c70_0_k0010_vk_0_t00.spv",
+          "gpu_block_size": 128,
+          "buffer_binds": [{
+              "buffer": {
+                "type": 2,
+                "id": -1},
+              "binding": 0},{
+              "buffer": {
+                "type": 0,
+                "id": 0},
+              "binding": 2}]}],
+      "args_count": 3,
+      "rets_count": 0,
+      "args_buffer_size": 24,
+      "rets_buffer_size": 0,
+      "scalar_args": {},
+      "arr_args": {"2": {
+          "dtype_name": "f32",
+          "field_dim": 1,
+          "element_shape": [3],
+          "shape_offset_in_args_buf": 8,
+          "bind_index": 0},"0": {
+          "dtype_name": "f32",
+          "field_dim": 1,
+          "element_shape": [3],
+          "shape_offset_in_args_buf": 0,
+          "bind_index": 0},"1": {
+          "dtype_name": "f32",
+          "field_dim": 1,
+          "element_shape": [3],
+          "shape_offset_in_args_buf": 4,
+          "bind_index": 0}}},"init": {
+      "tasks": [{
+          "type": "range_for",
+          "range_hint": "",
+          "name": "init_c86_0_k0004_vk_0_t00",
+          "source_path": "implicit_fem/init_c86_0_k0004_vk_0_t00.spv",
+          "gpu_block_size": 128,
+          "buffer_binds": [{
+              "buffer": {
+                "type": 0,
+                "id": 0},
+              "binding": 4},{
+              "buffer": {
+                "type": 2,
+                "id": -1},
+              "binding": 0}]},{
+          "type": "range_for",
           "range_hint": "1715",
-          "name": "get_force_c58_0_k0008_vk_0_t00",
-          "source_path": "implicit_fem/get_force_c58_0_k0008_vk_0_t00.spv",
+          "name": "init_c86_0_k0004_vk_1_t01",
+          "source_path": "implicit_fem/init_c86_0_k0004_vk_1_t01.spv",
           "gpu_block_size": 128,
           "buffer_binds": [{
               "buffer": {
@@ -84,85 +223,40 @@
               "binding": 0}]},{
           "type": "range_for",
           "range_hint": "",
-          "name": "get_force_c58_0_k0008_vk_1_t01",
-          "source_path": "implicit_fem/get_force_c58_0_k0008_vk_1_t01.spv",
+          "name": "init_c86_0_k0004_vk_2_t02",
+          "source_path": "implicit_fem/init_c86_0_k0004_vk_2_t02.spv",
           "gpu_block_size": 128,
           "buffer_binds": [{
               "buffer": {
                 "type": 2,
                 "id": -1},
-              "binding": 0},{
-              "buffer": {
-                "type": 0,
-                "id": 0},
-              "binding": 2}]}],
-      "args_count": 5,
+              "binding": 0}]}],
+      "args_count": 3,
       "rets_count": 0,
-      "args_buffer_size": 28,
+      "args_buffer_size": 24,
       "rets_buffer_size": 0,
-      "scalar_args": {"4": {
-          "dtype_name": "f32",
-          "offset_in_args_buf": 24},"2": {
-          "dtype_name": "f32",
-          "offset_in_args_buf": 16},"3": {
-          "dtype_name": "f32",
-          "offset_in_args_buf": 20}},
-      "arr_args": {"1": {
+      "scalar_args": {},
+      "arr_args": {"2": {
           "dtype_name": "f32",
           "field_dim": 1,
           "element_shape": [3],
-          "shape_offset_in_args_buf": 4,
+          "shape_offset_in_args_buf": 8,
           "bind_index": 0},"0": {
           "dtype_name": "f32",
           "field_dim": 1,
           "element_shape": [3],
           "shape_offset_in_args_buf": 0,
-          "bind_index": 0}}},"get_indices": {
-      "tasks": [{
-          "type": "serial",
-          "range_hint": "",
-          "name": "get_indices_c86_0_k0006_vk_0_t00",
-          "source_path": "implicit_fem/get_indices_c86_0_k0006_vk_0_t00.spv",
-          "gpu_block_size": 1,
-          "buffer_binds": [{
-              "buffer": {
-                "type": 1,
-                "id": -1},
-              "binding": 2}]},{
-          "type": "range_for",
-          "range_hint": "1715",
-          "name": "get_indices_c86_0_k0006_vk_1_t01",
-          "source_path": "implicit_fem/get_indices_c86_0_k0006_vk_1_t01.spv",
-          "gpu_block_size": 128,
-          "buffer_binds": [{
-              "buffer": {
-                "type": 2,
-                "id": -1},
-              "binding": 0},{
-              "buffer": {
-                "type": 0,
-                "id": 0},
-              "binding": 2},{
-              "buffer": {
-                "type": 1,
-                "id": -1},
-              "binding": 3}]}],
-      "args_count": 1,
-      "rets_count": 0,
-      "args_buffer_size": 8,
-      "rets_buffer_size": 0,
-      "scalar_args": {},
-      "arr_args": {"0": {
+          "bind_index": 0},"1": {
           "dtype_name": "f32",
           "field_dim": 1,
           "element_shape": [3],
-          "shape_offset_in_args_buf": 0,
+          "shape_offset_in_args_buf": 4,
           "bind_index": 0}}},"add_hack": {
       "tasks": [{
           "type": "range_for",
           "range_hint": "",
-          "name": "add_hack_c64_0_k0018_vk_0_t00",
-          "source_path": "implicit_fem/add_hack_c64_0_k0018_vk_0_t00.spv",
+          "name": "add_hack_c64_0_k0020_vk_0_t00",
+          "source_path": "implicit_fem/add_hack_c64_0_k0020_vk_0_t00.spv",
           "gpu_block_size": 128,
           "buffer_binds": [{
               "buffer": {
@@ -223,18 +317,89 @@
       "args_buffer_size": 0,
       "rets_buffer_size": 0,
       "scalar_args": {},
-      "arr_args": {}},"update_beta_r_2": {
+      "arr_args": {}},"fill_ndarray": {
+      "tasks": [{
+          "type": "range_for",
+          "range_hint": "",
+          "name": "fill_ndarray_c74_0_k0015_vk_0_t00",
+          "source_path": "implicit_fem/fill_ndarray_c74_0_k0015_vk_0_t00.spv",
+          "gpu_block_size": 128,
+          "buffer_binds": [{
+              "buffer": {
+                "type": 2,
+                "id": -1},
+              "binding": 0}]}],
+      "args_count": 2,
+      "rets_count": 0,
+      "args_buffer_size": 12,
+      "rets_buffer_size": 0,
+      "scalar_args": {"1": {
+          "dtype_name": "f32",
+          "offset_in_args_buf": 8}},
+      "arr_args": {"0": {
+          "dtype_name": "f32",
+          "field_dim": 1,
+          "element_shape": [3],
+          "shape_offset_in_args_buf": 0,
+          "bind_index": 0}}},"add_ndarray": {
+      "tasks": [{
+          "type": "range_for",
+          "range_hint": "",
+          "name": "add_ndarray_c66_0_k0014_vk_0_t00",
+          "source_path": "implicit_fem/add_ndarray_c66_0_k0014_vk_0_t00.spv",
+          "gpu_block_size": 128,
+          "buffer_binds": [{
+              "buffer": {
+                "type": 2,
+                "id": -1},
+              "binding": 0}]}],
+      "args_count": 3,
+      "rets_count": 0,
+      "args_buffer_size": 20,
+      "rets_buffer_size": 0,
+      "scalar_args": {"2": {
+          "dtype_name": "f32",
+          "offset_in_args_buf": 16}},
+      "arr_args": {"1": {
+          "dtype_name": "f32",
+          "field_dim": 1,
+          "element_shape": [3],
+          "shape_offset_in_args_buf": 4,
+          "bind_index": 0},"0": {
+          "dtype_name": "f32",
+          "field_dim": 1,
+          "element_shape": [3],
+          "shape_offset_in_args_buf": 0,
+          "bind_index": 0}}},"get_indices": {
       "tasks": [{
           "type": "serial",
           "range_hint": "",
-          "name": "update_beta_r_2_c78_0_k0017_vk_0_t00",
-          "source_path": "implicit_fem/update_beta_r_2_c78_0_k0017_vk_0_t00.spv",
+          "name": "get_indices_c90_0_k0007_vk_0_t00",
+          "source_path": "implicit_fem/get_indices_c90_0_k0007_vk_0_t00.spv",
           "gpu_block_size": 1,
           "buffer_binds": [{
               "buffer": {
+                "type": 1,
+                "id": -1},
+              "binding": 2}]},{
+          "type": "range_for",
+          "range_hint": "1715",
+          "name": "get_indices_c90_0_k0007_vk_1_t01",
+          "source_path": "implicit_fem/get_indices_c90_0_k0007_vk_1_t01.spv",
+          "gpu_block_size": 128,
+          "buffer_binds": [{
+              "buffer": {
+                "type": 2,
+                "id": -1},
+              "binding": 0},{
+              "buffer": {
                 "type": 0,
                 "id": 0},
-              "binding": 2}]}],
+              "binding": 2},{
+              "buffer": {
+                "type": 1,
+                "id": -1},
+              "binding": 3}]}],
       "args_count": 1,
       "rets_count": 0,
       "args_buffer_size": 8,
@@ -242,65 +407,15 @@
       "scalar_args": {},
       "arr_args": {"0": {
           "dtype_name": "f32",
-          "field_dim": 0,
-          "element_shape": [],
-          "shape_offset_in_args_buf": 0,
-          "bind_index": 0}}},"get_b": {
-      "tasks": [{
-          "type": "range_for",
-          "range_hint": "",
-          "name": "get_b_c68_0_k0009_vk_0_t00",
-          "source_path": "implicit_fem/get_b_c68_0_k0009_vk_0_t00.spv",
-          "gpu_block_size": 128,
-          "buffer_binds": [{
-              "buffer": {
-                "type": 2,
-                "id": -1},
-              "binding": 0},{
-              "buffer": {
-                "type": 0,
-                "id": 0},
-              "binding": 2}]}],
-      "args_count": 3,
-      "rets_count": 0,
-      "args_buffer_size": 24,
-      "rets_buffer_size": 0,
-      "scalar_args": {},
-      "arr_args": {"2": {
-          "dtype_name": "f32",
-          "field_dim": 1,
-          "element_shape": [3],
-          "shape_offset_in_args_buf": 8,
-          "bind_index": 0},"0": {
-          "dtype_name": "f32",
           "field_dim": 1,
           "element_shape": [3],
           "shape_offset_in_args_buf": 0,
-          "bind_index": 0},"1": {
-          "dtype_name": "f32",
-          "field_dim": 1,
-          "element_shape": [3],
-          "shape_offset_in_args_buf": 4,
-          "bind_index": 0}}},"init": {
+          "bind_index": 0}}},"get_force": {
       "tasks": [{
-          "type": "range_for",
-          "range_hint": "",
-          "name": "init_c82_0_k0004_vk_0_t00",
-          "source_path": "implicit_fem/init_c82_0_k0004_vk_0_t00.spv",
-          "gpu_block_size": 128,
-          "buffer_binds": [{
-              "buffer": {
-                "type": 2,
-                "id": -1},
-              "binding": 0},{
-              "buffer": {
-                "type": 0,
-                "id": 0},
-              "binding": 2}]},{
           "type": "range_for",
           "range_hint": "1715",
-          "name": "init_c82_0_k0004_vk_1_t01",
-          "source_path": "implicit_fem/init_c82_0_k0004_vk_1_t01.spv",
+          "name": "get_force_c58_0_k0009_vk_0_t00",
+          "source_path": "implicit_fem/get_force_c58_0_k0009_vk_0_t00.spv",
           "gpu_block_size": 128,
           "buffer_binds": [{
               "buffer": {
@@ -313,40 +428,45 @@
               "binding": 0}]},{
           "type": "range_for",
           "range_hint": "",
-          "name": "init_c82_0_k0004_vk_2_t02",
-          "source_path": "implicit_fem/init_c82_0_k0004_vk_2_t02.spv",
+          "name": "get_force_c58_0_k0009_vk_1_t01",
+          "source_path": "implicit_fem/get_force_c58_0_k0009_vk_1_t01.spv",
           "gpu_block_size": 128,
           "buffer_binds": [{
               "buffer": {
                 "type": 2,
                 "id": -1},
-              "binding": 0}]}],
-      "args_count": 3,
+              "binding": 0},{
+              "buffer": {
+                "type": 0,
+                "id": 0},
+              "binding": 2}]}],
+      "args_count": 5,
       "rets_count": 0,
-      "args_buffer_size": 24,
+      "args_buffer_size": 28,
       "rets_buffer_size": 0,
-      "scalar_args": {},
-      "arr_args": {"2": {
+      "scalar_args": {"4": {
+          "dtype_name": "f32",
+          "offset_in_args_buf": 24},"2": {
+          "dtype_name": "f32",
+          "offset_in_args_buf": 16},"3": {
+          "dtype_name": "f32",
+          "offset_in_args_buf": 20}},
+      "arr_args": {"1": {
           "dtype_name": "f32",
           "field_dim": 1,
           "element_shape": [3],
-          "shape_offset_in_args_buf": 8,
+          "shape_offset_in_args_buf": 4,
           "bind_index": 0},"0": {
           "dtype_name": "f32",
           "field_dim": 1,
           "element_shape": [3],
           "shape_offset_in_args_buf": 0,
-          "bind_index": 0},"1": {
-          "dtype_name": "f32",
-          "field_dim": 1,
-          "element_shape": [3],
-          "shape_offset_in_args_buf": 4,
           "bind_index": 0}}},"matmul_cell": {
       "tasks": [{
           "type": "range_for",
           "range_hint": "",
-          "name": "matmul_cell_c60_0_k0010_vk_0_t00",
-          "source_path": "implicit_fem/matmul_cell_c60_0_k0010_vk_0_t00.spv",
+          "name": "matmul_cell_c60_0_k0011_vk_0_t00",
+          "source_path": "implicit_fem/matmul_cell_c60_0_k0011_vk_0_t00.spv",
           "gpu_block_size": 128,
           "buffer_binds": [{
               "buffer": {
@@ -359,8 +479,8 @@
               "binding": 2}]},{
           "type": "range_for",
           "range_hint": "1715",
-          "name": "matmul_cell_c60_0_k0010_vk_1_t01",
-          "source_path": "implicit_fem/matmul_cell_c60_0_k0010_vk_1_t01.spv",
+          "name": "matmul_cell_c60_0_k0011_vk_1_t01",
+          "source_path": "implicit_fem/matmul_cell_c60_0_k0011_vk_1_t01.spv",
           "gpu_block_size": 128,
           "buffer_binds": [{
               "buffer": {
@@ -390,8 +510,8 @@
       "tasks": [{
           "type": "range_for",
           "range_hint": "",
-          "name": "ndarray_to_ndarray_c70_0_k0011_vk_0_t00",
-          "source_path": "implicit_fem/ndarray_to_ndarray_c70_0_k0011_vk_0_t00.spv",
+          "name": "ndarray_to_ndarray_c72_0_k0012_vk_0_t00",
+          "source_path": "implicit_fem/ndarray_to_ndarray_c72_0_k0012_vk_0_t00.spv",
           "gpu_block_size": 128,
           "buffer_binds": [{
               "buffer": {
@@ -417,8 +537,8 @@
       "tasks": [{
           "type": "range_for",
           "range_hint": "",
-          "name": "add_c62_0_k0012_vk_0_t00",
-          "source_path": "implicit_fem/add_c62_0_k0012_vk_0_t00.spv",
+          "name": "add_c62_0_k0013_vk_0_t00",
+          "source_path": "implicit_fem/add_c62_0_k0013_vk_0_t00.spv",
           "gpu_block_size": 128,
           "buffer_binds": [{
               "buffer": {
@@ -447,71 +567,6 @@
           "field_dim": 1,
           "element_shape": [3],
           "shape_offset_in_args_buf": 4,
-          "bind_index": 0}}},"fill_ndarray": {
-      "tasks": [{
-          "type": "range_for",
-          "range_hint": "",
-          "name": "fill_ndarray_c72_0_k0013_vk_0_t00",
-          "source_path": "implicit_fem/fill_ndarray_c72_0_k0013_vk_0_t00.spv",
-          "gpu_block_size": 128,
-          "buffer_binds": [{
-              "buffer": {
-                "type": 2,
-                "id": -1},
-              "binding": 0}]}],
-      "args_count": 2,
-      "rets_count": 0,
-      "args_buffer_size": 12,
-      "rets_buffer_size": 0,
-      "scalar_args": {"1": {
-          "dtype_name": "f32",
-          "offset_in_args_buf": 8}},
-      "arr_args": {"0": {
-          "dtype_name": "f32",
-          "field_dim": 1,
-          "element_shape": [3],
-          "shape_offset_in_args_buf": 0,
-          "bind_index": 0}}},"dot2scalar": {
-      "tasks": [{
-          "type": "serial",
-          "range_hint": "",
-          "name": "dot2scalar_c66_0_k0014_vk_0_t00",
-          "source_path": "implicit_fem/dot2scalar_c66_0_k0014_vk_0_t00.spv",
-          "gpu_block_size": 1,
-          "buffer_binds": [{
-              "buffer": {
-                "type": 0,
-                "id": 0},
-              "binding": 2}]},{
-          "type": "range_for",
-          "range_hint": "",
-          "name": "dot2scalar_c66_0_k0014_vk_1_t01",
-          "source_path": "implicit_fem/dot2scalar_c66_0_k0014_vk_1_t01.spv",
-          "gpu_block_size": 128,
-          "buffer_binds": [{
-              "buffer": {
-                "type": 2,
-                "id": -1},
-              "binding": 0},{
-              "buffer": {
-                "type": 0,
-                "id": 0},
-              "binding": 4}]}],
-      "args_count": 2,
-      "rets_count": 0,
-      "args_buffer_size": 16,
-      "rets_buffer_size": 0,
-      "scalar_args": {},
-      "arr_args": {"1": {
-          "dtype_name": "f32",
-          "field_dim": 1,
-          "element_shape": [3],
-          "shape_offset_in_args_buf": 4,
-          "bind_index": 0},"0": {
-          "dtype_name": "f32",
-          "field_dim": 1,
-          "element_shape": [3],
-          "shape_offset_in_args_buf": 0,
           "bind_index": 0}}}},
   "kernel_tmpls": {},
   "fields": [{

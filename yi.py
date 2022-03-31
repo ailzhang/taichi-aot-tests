@@ -168,11 +168,11 @@ def add2(ans: ti.any_arr(), a: ti.any_arr(), k: ti.f32):
         ans[i] = ans[i] + a[i]
 
 
+'''
 @ti.kernel
 def add_ndarray(ans: ti.any_arr(), v: ti.any_arr(), k: ti.f32):
     for i in ans:
         ans[i] += k * v[i]
-'''
 
 
 # @ti.kernel
@@ -231,6 +231,7 @@ def cg(x, b, v, r0, p0, mul_ans, f, alpha_scalar, beta_scalar):
     # p0.copy_from(r0)
     ndarray_to_ndarray(p0, r0)
     dot2scalar(r0, r0)
+    # print(dot_ans[None])
     init_r_2()
     n_iter = 8
     for it in range(n_iter):
@@ -342,10 +343,15 @@ def advect(x: ti.any_arr(), v: ti.any_arr(), f: ti.any_arr()):
         x[p] += dt * v[p]
         f[p] = ti.Vector([0, 0, 0])
 
+@ti.kernel
+def init_x(x: ti.any_arr()):
+    for u in x:
+        x[u] = ox[u]
+
 
 @ti.kernel
 def init(x: ti.any_arr(), v: ti.any_arr(), f: ti.any_arr()):
-    for u in x:
+    for u in v:
         # x[u] = ox[0]
         # x[u] = [1.0, 1.0, 0.1]
         x[u] = ox[u]
@@ -460,7 +466,7 @@ def run_sim(x, b, r0, p0, v, mul_ans, f, alpha_scalar, beta_scalar):
         if gui.get_event(ti.GUI.PRESS):
             if gui.event.key in [ti.GUI.ESCAPE, ti.GUI.EXIT]: break
         if gui.is_pressed('r'):
-            init(x, v)
+            init(x, v, f)
         gui.clear(0x000000)
         xnp = x.to_numpy()
         xpos = T(xnp / 3)
@@ -472,6 +478,7 @@ def run_sim(x, b, r0, p0, v, mul_ans, f, alpha_scalar, beta_scalar):
 def run_aot_shared(m, x, v, f):
     m.add_kernel(get_vertices)
     m.add_kernel(init, (x, v, f))
+    m.add_kernel(init_x, (x,))
     m.add_kernel(get_indices, (x, ))
     m.add_kernel(floor_bound, (x, v))
     m.add_field('ox', ox)
@@ -494,7 +501,7 @@ def run_aot_implicit(m, x, b, r0, p0, v, mul_ans, f, alpha_scalar, beta_scalar):
     m.add_kernel(ndarray_to_ndarray, (p0, r0))
     m.add_kernel(add, (r0, b, mul_ans))
     # m.add_kernel(add2, (p0, r0))
-    # m.add_kernel(add_ndarray, (x, v))
+    m.add_kernel(add_ndarray, (x, v))
     m.add_kernel(fill_ndarray, (f, ))
     m.add_kernel(dot2scalar, (r0, r0))
     m.add_kernel(init_r_2)

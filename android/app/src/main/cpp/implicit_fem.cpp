@@ -6,7 +6,6 @@
 #include <android/sensor.h>
 //#include <hardware/sensors.h>
 #include <jni.h>
-
 #include <taichi/backends/vulkan/vulkan_program.h>
 #include <taichi/backends/vulkan/vulkan_common.h>
 #include <taichi/backends/vulkan/vulkan_loader.h>
@@ -67,6 +66,7 @@ void set_ctx_arg_float(taichi::lang::RuntimeContext &host_ctx, int arg_id, float
 std::unique_ptr<taichi::lang::MemoryPool> memory_pool;
 std::unique_ptr<taichi::lang::vulkan::VkRuntime> vulkan_runtime;
 taichi::lang::aot::Kernel* init_kernel;
+taichi::lang::aot::Kernel* init_x_kernel;
 taichi::lang::aot::Kernel* get_vertices_kernel;
 taichi::lang::aot::Kernel* get_indices_kernel;
 taichi::lang::aot::Kernel* get_force_kernel;
@@ -195,6 +195,7 @@ Java_com_innopeaktech_naboo_taichi_1test_NativeLib_init(JNIEnv *env,
   vulkan_runtime->add_root_buffer(root_size);
   get_vertices_kernel = module->get_kernel("get_vertices");
   init_kernel = module->get_kernel("init");
+  init_x_kernel = module->get_kernel("init_x");
   get_indices_kernel = module->get_kernel("get_indices");
 
   get_force_kernel = module->get_kernel("get_force");
@@ -273,6 +274,9 @@ Java_com_innopeaktech_naboo_taichi_1test_NativeLib_init(JNIEnv *env,
   // get_vertices()
   get_vertices_kernel->launch(&host_ctx);
   // init(x, v, f)
+  //init_kernel->launch(&host_ctx);
+
+  init_x_kernel->launch(&host_ctx);
   init_kernel->launch(&host_ctx);
   // get_indices(x)
   get_indices_kernel->launch(&host_ctx);
@@ -329,7 +333,7 @@ Java_com_innopeaktech_naboo_taichi_1test_NativeLib_render(JNIEnv *env,
                                                           jobject surface) {
   // timer starts before launch kernel
   auto start = std::chrono  ::steady_clock::now();
-  float g_x, g_y, g_z;
+  float g_x = 0., g_y = 0., g_z = 0.;
 
   if (sensor && !ASensorEventQueue_enableSensor(queue, sensor)) {
     int ident = ALooper_pollAll(kTimeoutMilliSecs, NULL, NULL, NULL);
@@ -342,12 +346,34 @@ Java_com_innopeaktech_naboo_taichi_1test_NativeLib_render(JNIEnv *env,
 
         ALOGI("Acceleration: g_x = %f, g_y = %f, g_z = %f", data.acceleration.x, data.acceleration.y, data.acceleration.z);
         g_x = 0.;
-        g_y = data.acceleration.y > 2 || data.acceleration.y < -2 ? -data.acceleration.y : 0;
-        g_z = data.acceleration.x > 2 || data.acceleration.x < -2 ? data.acceleration.x * 5 : 0;
+        g_y = 0;
+        g_z = 0;
+        //g_y = data.acceleration.y > 2 || data.acceleration.y < -2 ? -data.acceleration.y : 0;
+        //g_z = data.acceleration.x > 2 || data.acceleration.x < -2 ? data.acceleration.x * 5 : 0;
       }
     }
   }
 
+  if (false) {
+  set_ctx_arg_devalloc(host_ctx, 0, dalloc_circles);
+  set_ctx_arg_float(host_ctx, 1, 1);
+  fill_ndarray_kernel->launch(&host_ctx);
+
+  set_ctx_arg_devalloc(host_ctx, 0, dalloc_circles);
+  set_ctx_arg_float(host_ctx, 1, 3);
+  fill_ndarray_kernel->launch(&host_ctx);
+
+  set_ctx_arg_devalloc(host_ctx, 0, dalloc_circles);
+  set_ctx_arg_devalloc(host_ctx, 1, dalloc_v);
+  set_ctx_arg_devalloc(host_ctx, 2, dalloc_f);
+
+  // get_vertices()
+  //get_vertices_kernel->launch(&host_ctx);
+  // init(x, v, f)
+  init_x_kernel->launch(&host_ctx);
+  init_kernel->launch(&host_ctx);
+
+  } else {
   float dt = 1e-2;
   //ALOGI("before launch kernel substep");
 #ifdef USE_EXPLICIT
@@ -533,21 +559,22 @@ Java_com_innopeaktech_naboo_taichi_1test_NativeLib_render(JNIEnv *env,
   fill_ndarray_kernel->launch(&host_ctx);
 
   // add(x, x, dt, v)
+  /*
   set_ctx_arg_devalloc(host_ctx, 0, dalloc_circles);
   set_ctx_arg_devalloc(host_ctx, 1, dalloc_circles);
   set_ctx_arg_float(host_ctx, 2, dt);
   set_ctx_arg_devalloc(host_ctx, 3, dalloc_v);
   add_kernel->launch(&host_ctx);
-  /*
+  */
   set_ctx_arg_devalloc(host_ctx, 0, dalloc_circles);
   set_ctx_arg_devalloc(host_ctx, 1, dalloc_v);
   set_ctx_arg_float(host_ctx, 2, dt);
   add_ndarray_kernel->launch(&host_ctx);
-  */
 #endif
   set_ctx_arg_devalloc(host_ctx, 0, dalloc_circles);
   set_ctx_arg_devalloc(host_ctx, 1, dalloc_v);
   floor_bound_kernel->launch(&host_ctx);
+  }
   //ALOGI("launch kernel floor_bound");
   // Make sure to sync the GPU memory so we can read the latest update from CPU
   // And read the 'x' calculated on GPU to our local variable
