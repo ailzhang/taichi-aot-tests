@@ -147,23 +147,45 @@ void run_init(int _width, int _height, std::string path_prefix, taichi::ui::Taic
     evd_params.additional_device_extensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
-    evd_params.is_for_ui = true;
-    evd_params.surface_creator = [&](VkInstance instance) -> VkSurfaceKHR {
-      VkSurfaceKHR surface = VK_NULL_HANDLE;
-      TI_TRACE("before glfwCreateWindowSurface {} {}", (void *)window,
-               (void *)instance);
-      int status = VK_SUCCESS;
-      if ((status = glfwCreateWindowSurface(instance, window, nullptr,
-                                            &surface)) != VK_SUCCESS) {
-        TI_ERROR("Failed to create window surface! err: {}", status);
-        throw std::runtime_error("failed to create window surface!");
-      }
-      return surface;
-    };
+    evd_params.is_for_ui = false;
+    evd_params.surface_creator = nullptr;
+    // [&](VkInstance instance) -> VkSurfaceKHR {
+    //   VkSurfaceKHR surface = VK_NULL_HANDLE;
+    //   TI_TRACE("before glfwCreateWindowSurface {} {}", (void *)window,
+    //            (void *)instance);
+    //   int status = VK_SUCCESS;
+    //   if ((status = glfwCreateWindowSurface(instance, window, nullptr,
+    //                                         &surface)) != VK_SUCCESS) {
+    //     TI_ERROR("Failed to create window surface! err: {}", status);
+    //     throw std::runtime_error("failed to create window surface!");
+    //   }
+    //   return surface;
+    // };
 
     embedded_device = std::make_unique<taichi::lang::vulkan::VulkanDeviceCreator>(evd_params);
 
     device = static_cast<taichi::lang::vulkan::VulkanDevice *>(embedded_device->device());
+
+    {
+        taichi::lang::SurfaceConfig config;
+        config.vsync = true;
+        config.window_handle = window;
+        config.width = width;
+        config.height = height;
+        surface = device->create_surface(config);
+    }
+
+    {
+        taichi::lang::ImageParams params;
+        params.dimension = ImageDimension::d2D;
+        params.format = BufferFormat::depth32f;
+        params.initial_layout = ImageLayout::undefined;
+        params.x = width;
+        params.y = height;
+        params.export_sharing = false;
+
+        depth_allocation = device->create_image(params);
+    }
 
     // Initialize our Vulkan Program pipeline
     taichi::uint64 *result_buffer{nullptr};
@@ -204,7 +226,9 @@ void run_init(int _width, int _height, std::string path_prefix, taichi::ui::Taic
     alloc_params.host_write = true;
     // x
     alloc_params.size = N_VERTS * 3 * sizeof(float);
+    alloc_params.usage = taichi::lang::AllocUsage::Vertex | taichi::lang::AllocUsage::Storage;
     devalloc_x = vulkan_runtime->get_ti_device()->allocate_memory(alloc_params);
+    alloc_params.usage = taichi::lang::AllocUsage::Storage;
     // v
     devalloc_v = vulkan_runtime->get_ti_device()->allocate_memory(alloc_params);
     // f
@@ -223,7 +247,9 @@ void run_init(int _width, int _height, std::string path_prefix, taichi::ui::Taic
     devalloc_p0 = vulkan_runtime->get_ti_device()->allocate_memory(alloc_params);
     // indices
     alloc_params.size = N_FACES * 3 * sizeof(int);
+    alloc_params.usage = taichi::lang::AllocUsage::Index;
     devalloc_indices = vulkan_runtime->get_ti_device()->allocate_memory(alloc_params);
+    alloc_params.usage = taichi::lang::AllocUsage::Storage;
     // vertices
     alloc_params.size = N_CELLS * 4 * sizeof(int);
     devalloc_vertices = vulkan_runtime->get_ti_device()->allocate_memory(alloc_params);
@@ -262,50 +288,29 @@ void run_init(int _width, int _height, std::string path_prefix, taichi::ui::Taic
     vulkan_runtime->synchronize();
 
     {
-        taichi::lang::SurfaceConfig config;
-        config.vsync = true;
-        config.window_handle = window;
-        config.width = width;
-        config.height = height;
-        surface = device->create_surface(config);
-    }
+        // auto vert_code = taichi::ui::read_file("shaders/render_point.vert.spv");
+        // auto frag_code = taichi::ui::read_file("shaders/render_point.frag.spv");
 
-    {
-        taichi::lang::ImageParams params;
-        params.dimension = ImageDimension::d2D;
-        params.format = BufferFormat::depth32f;
-        params.initial_layout = ImageLayout::undefined;
-        params.x = width;
-        params.y = height;
-        params.export_sharing = false;
+        // std::vector<PipelineSourceDesc> source(2);
+        // source[0] = {PipelineSourceType::spirv_binary, frag_code.data(),
+        //             frag_code.size(), PipelineStageType::fragment};
+        // source[1] = {PipelineSourceType::spirv_binary, vert_code.data(),
+        //             vert_code.size(), PipelineStageType::vertex};
 
-        depth_allocation = device->create_image(params);
-    }
+        // RasterParams raster_params;
+        // raster_params.prim_topology = TopologyType::Points;
+        // raster_params.depth_test = true;
+        // raster_params.depth_write = true;
 
-    {
-        auto vert_code = taichi::ui::read_file("shaders/render_point.vert.spv");
-        auto frag_code = taichi::ui::read_file("shaders/render_point.frag.spv");
+        // std::vector<VertexInputBinding> vertex_inputs = {
+        //     {/*binding=*/0, /*stride=*/3 * sizeof(float), /*instance=*/false}};
+        // std::vector<VertexInputAttribute> vertex_attribs;
+        // vertex_attribs.push_back({/*location=*/0, /*binding=*/0,
+        //                         /*format=*/BufferFormat::rgb32f,
+        //                         /*offset=*/0});
 
-        std::vector<PipelineSourceDesc> source(2);
-        source[0] = {PipelineSourceType::spirv_binary, frag_code.data(),
-                    frag_code.size(), PipelineStageType::fragment};
-        source[1] = {PipelineSourceType::spirv_binary, vert_code.data(),
-                    vert_code.size(), PipelineStageType::vertex};
-
-        RasterParams raster_params;
-        raster_params.prim_topology = TopologyType::Points;
-        raster_params.depth_test = true;
-        raster_params.depth_write = true;
-
-        std::vector<VertexInputBinding> vertex_inputs = {
-            {/*binding=*/0, /*stride=*/3 * sizeof(float), /*instance=*/false}};
-        std::vector<VertexInputAttribute> vertex_attribs;
-        vertex_attribs.push_back({/*location=*/0, /*binding=*/0,
-                                /*format=*/BufferFormat::rgb32f,
-                                /*offset=*/0});
-
-        render_point_pipeline = device->create_raster_pipeline(
-            source, raster_params, vertex_inputs, vertex_attribs);
+        // render_point_pipeline = device->create_raster_pipeline(
+        //     source, raster_params, vertex_inputs, vertex_attribs);
     }
 
         {
@@ -485,15 +490,15 @@ void run_render_loop(float a_x = 0, float a_y = -9.8, float a_z = 0) {
     }
 
     // Draw points
-    {
-        auto resource_binder = render_point_pipeline->resource_binder();
-        resource_binder->buffer(0, 0, render_constants.get_ptr(0));
-        resource_binder->vertex_buffer(devalloc_x.get_ptr(0));
+    // {
+    //     auto resource_binder = render_point_pipeline->resource_binder();
+    //     resource_binder->buffer(0, 0, render_constants.get_ptr(0));
+    //     resource_binder->vertex_buffer(devalloc_x.get_ptr(0));
 
-        cmd_list->bind_pipeline(render_point_pipeline.get());
-        cmd_list->bind_resources(resource_binder);
-        cmd_list->draw(N_VERTS);        
-    }
+    //     cmd_list->bind_pipeline(render_point_pipeline.get());
+    //     cmd_list->bind_resources(resource_binder);
+    //     cmd_list->draw(N_VERTS);
+    // }
 
     cmd_list->end_renderpass();
     stream->submit_synced(cmd_list.get());
