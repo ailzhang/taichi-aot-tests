@@ -57,5 +57,7 @@ int main() {
         glfwPollEvents();
     }
 
+    cleanup();
+
     return 0;
 }
