@@ -127,6 +127,13 @@ void run_init(int _width, int _height, std::string path_prefix, taichi::ui::Taic
     width = _width;
     height = _height;
 
+#ifdef ANDROID
+    std::vector<std::string> extensions;
+
+    extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+#else
     // Create a Vulkan Device
     std::vector<std::string> extensions = {
         VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
@@ -140,7 +147,7 @@ void run_init(int _width, int _height, std::string path_prefix, taichi::ui::Taic
     for (int i = 0; i < glfw_ext_count; ++i) {
         extensions.push_back(glfw_extensions[i]);
     }
-
+#endif
     taichi::lang::vulkan::VulkanDeviceCreator::Params evd_params;
     evd_params.api_version = VK_API_VERSION_1_2;
     evd_params.additional_instance_extensions = extensions;
@@ -314,8 +321,8 @@ void run_init(int _width, int _height, std::string path_prefix, taichi::ui::Taic
     }
 
         {
-        auto vert_code = taichi::ui::read_file("shaders/surface.vert.spv");
-        auto frag_code = taichi::ui::read_file("shaders/surface.frag.spv");
+        auto vert_code = taichi::ui::read_file(path_prefix + "/rhi_shaders/surface.vert.spv");
+        auto frag_code = taichi::ui::read_file(path_prefix + "/rhi_shaders/surface.frag.spv");
 
         std::vector<PipelineSourceDesc> source(2);
         source[0] = {PipelineSourceType::spirv_binary, frag_code.data(),
