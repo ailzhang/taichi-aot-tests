@@ -156,18 +156,6 @@ void run_init(int _width, int _height, std::string path_prefix, taichi::ui::Taic
     };
     evd_params.is_for_ui = false;
     evd_params.surface_creator = nullptr;
-    // [&](VkInstance instance) -> VkSurfaceKHR {
-    //   VkSurfaceKHR surface = VK_NULL_HANDLE;
-    //   TI_TRACE("before glfwCreateWindowSurface {} {}", (void *)window,
-    //            (void *)instance);
-    //   int status = VK_SUCCESS;
-    //   if ((status = glfwCreateWindowSurface(instance, window, nullptr,
-    //                                         &surface)) != VK_SUCCESS) {
-    //     TI_ERROR("Failed to create window surface! err: {}", status);
-    //     throw std::runtime_error("failed to create window surface!");
-    //   }
-    //   return surface;
-    // };
 
     embedded_device = std::make_unique<taichi::lang::vulkan::VulkanDeviceCreator>(evd_params);
 
@@ -295,32 +283,6 @@ void run_init(int _width, int _height, std::string path_prefix, taichi::ui::Taic
     vulkan_runtime->synchronize();
 
     {
-        // auto vert_code = taichi::ui::read_file("shaders/render_point.vert.spv");
-        // auto frag_code = taichi::ui::read_file("shaders/render_point.frag.spv");
-
-        // std::vector<PipelineSourceDesc> source(2);
-        // source[0] = {PipelineSourceType::spirv_binary, frag_code.data(),
-        //             frag_code.size(), PipelineStageType::fragment};
-        // source[1] = {PipelineSourceType::spirv_binary, vert_code.data(),
-        //             vert_code.size(), PipelineStageType::vertex};
-
-        // RasterParams raster_params;
-        // raster_params.prim_topology = TopologyType::Points;
-        // raster_params.depth_test = true;
-        // raster_params.depth_write = true;
-
-        // std::vector<VertexInputBinding> vertex_inputs = {
-        //     {/*binding=*/0, /*stride=*/3 * sizeof(float), /*instance=*/false}};
-        // std::vector<VertexInputAttribute> vertex_attribs;
-        // vertex_attribs.push_back({/*location=*/0, /*binding=*/0,
-        //                         /*format=*/BufferFormat::rgb32f,
-        //                         /*offset=*/0});
-
-        // render_point_pipeline = device->create_raster_pipeline(
-        //     source, raster_params, vertex_inputs, vertex_attribs);
-    }
-
-        {
         auto vert_code = taichi::ui::read_file(path_prefix + "/rhi_shaders/surface.vert.spv");
         auto frag_code = taichi::ui::read_file(path_prefix + "/rhi_shaders/surface.frag.spv");
 
@@ -495,17 +457,6 @@ void run_render_loop(float a_x = 0, float a_y = -9.8, float a_z = 0) {
         cmd_list->bind_resources(resource_binder);
         cmd_list->draw_indexed(N_FACES * 3);
     }
-
-    // Draw points
-    // {
-    //     auto resource_binder = render_point_pipeline->resource_binder();
-    //     resource_binder->buffer(0, 0, render_constants.get_ptr(0));
-    //     resource_binder->vertex_buffer(devalloc_x.get_ptr(0));
-
-    //     cmd_list->bind_pipeline(render_point_pipeline.get());
-    //     cmd_list->bind_resources(resource_binder);
-    //     cmd_list->draw(N_VERTS);
-    // }
 
     cmd_list->end_renderpass();
     stream->submit_synced(cmd_list.get());
