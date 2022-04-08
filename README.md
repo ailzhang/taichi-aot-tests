@@ -1,14 +1,5 @@
 # taichi-vk-launcher
 
-Make sure to apply the patch `0002-WIP-Allow-temporary-reading-root-buffer-memory-for-t.patch` 
-`0003-WIP-Add-stable-fluid-ndarray-aot.patch` `0004-WIP-Modify-set-image-class-for-t.patch`in your Taichi repo:
-
-```
-git apply 0002-WIP-Allow-temporary-reading-root-buffer-memory-for-t.patch
-git apply 0003-WIP-Add-stable-fluid-ndarray-aot.patch
-git apply 0004-WIP-Modify-set-image-class-for-t.patch
-```
-
 ## Desktop Build
 ```
 export TAICHI_REPO_DIR=/path/github/taichi/
@@ -28,9 +19,10 @@ export TAICHI_REPO_DIR=/path/github/taichi/
 cd android
 ./gradlew assembleDebug
 adb install ./app/build/outputs/apk/debug/app-debug.apk
-adb push ../mpm88 /data/local/tmp/
-adb shell chmod -R 777 /data/local/tmp/mpm88/
-adb push $TAICHI_REPO_DIR/python/taichi/shaders /data/local/tmp/
+adb push ../implicit_mesh_fem /data/local/tmp/
+adb push ../rhi_shaders /data/local/tmp/
+adb push ../shaders /data/local/tmp/
+adb shell chmod -R 777 /data/local/tmp/
 ```
 
 Taichi built with
