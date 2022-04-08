@@ -11,7 +11,7 @@ constexpr int N_VERTS = 616;
 constexpr int N_CELLS = 1770;
 constexpr int N_FACES = 1138;
 constexpr int N_EDGES = 2954;
-float dt = 7.5e-3;
+constexpr float dt = 1e-2;
 
 #include "data.h"
 
@@ -317,7 +317,7 @@ void run_init(int _width, int _height, std::string path_prefix, taichi::ui::Taic
 
 
 void run_render_loop(float a_x = 0, float a_y = -9.8, float a_z = 0) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 5; i++) {
             // get_force(x, f, vertices)
             set_ctx_arg_devalloc(host_ctx, 0, devalloc_x, N_VERTS, 3, 1);
             set_ctx_arg_devalloc(host_ctx, 1, devalloc_f, N_VERTS, 3, 1);
