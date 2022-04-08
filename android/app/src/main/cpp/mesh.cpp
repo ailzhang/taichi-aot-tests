@@ -84,11 +84,9 @@ Java_com_innopeaktech_naboo_taichi_1test_NativeLib_render(JNIEnv *env,
                                                           float g_z
                                                           ) {
   ALOGI("Acceleration: g_x = %f, g_y = %f, g_z = %f", g_x, g_y, g_z);
-  float a_x = g_x > 2 || g_x < -2 ? -g_x * 8 : 0;
+  float a_x = g_x > 2 || g_x < -2 ? -g_x * 4 : 0;
   float a_y = g_y > 2 || g_y < -2 ? -g_y * 4 : 0;
-  // z-axis is not very visible on mobile
-  //float a_z = g_z > 2 || g_z < -2 ? -g_z * 6 : 0;
-  float a_z = 0;
+  float a_z = g_z > 2 || g_z < -2 ? -g_z * 4 : 0;
 
   run_render_loop(a_x, a_y, a_z);
 }

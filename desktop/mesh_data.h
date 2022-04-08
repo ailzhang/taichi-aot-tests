@@ -126,8 +126,8 @@ struct RenderConstants {
 };
 
 void run_init(int _width, int _height, std::string path_prefix, taichi::ui::TaichiWindow* window) {
-    width = std::min(_height, _width);
-    height = std::min(_height, _width);
+    width = _width;
+    height = _height;
 
 #ifdef ANDROID
     std::vector<std::string> extensions;
