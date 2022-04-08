@@ -18,9 +18,9 @@ public class AccelerationSensor implements SensorEventListener {
     sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
     sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
     //if (sensor == null) Log.e("error", "ACCELERATION SENSOR NOT SUPPORTED");
+    gravity = new float[3];
     if (sensor == null) return;
     sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME);
-    gravity = new float[3];
   }
 
   @Override

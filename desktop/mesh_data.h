@@ -11,7 +11,7 @@ constexpr int N_VERTS = 616;
 constexpr int N_CELLS = 1770;
 constexpr int N_FACES = 1138;
 constexpr int N_EDGES = 2954;
-constexpr float dt = 1e-2;
+constexpr float dt = 7.5e-3;
 
 #include "data.h"
 
