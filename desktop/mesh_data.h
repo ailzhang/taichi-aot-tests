@@ -13,6 +13,8 @@ constexpr int N_FACES = 1138;
 constexpr int N_EDGES = 2954;
 constexpr float dt = 7.5e-3;
 
+//#define ONLY_INIT
+
 #include "data.h"
 
 using namespace taichi::lang;
@@ -317,6 +319,15 @@ void run_init(int _width, int _height, std::string path_prefix, taichi::ui::Taic
 
 
 void run_render_loop(float a_x = 0, float a_y = -9.8, float a_z = 0) {
+#ifdef ONLY_INIT
+        set_ctx_arg_devalloc(host_ctx, 0, devalloc_x, N_VERTS, 3, 1);
+        set_ctx_arg_devalloc(host_ctx, 1, devalloc_v, N_VERTS, 3, 1);
+        set_ctx_arg_devalloc(host_ctx, 2, devalloc_f, N_VERTS, 3, 1);
+        set_ctx_arg_devalloc(host_ctx, 3, devalloc_ox, N_VERTS, 3, 1);
+        set_ctx_arg_devalloc(host_ctx, 4, devalloc_vertices, N_CELLS, 4, 1);
+        loaded_kernels.init_kernel->launch(&host_ctx);
+        print_debug(*vulkan_runtime, devalloc_x, 0);
+#else
         for (int i = 0; i < 5; i++) {
             // get_force(x, f, vertices)
             set_ctx_arg_devalloc(host_ctx, 0, devalloc_x, N_VERTS, 3, 1);
@@ -418,14 +429,6 @@ void run_render_loop(float a_x = 0, float a_y = -9.8, float a_z = 0) {
         set_ctx_arg_devalloc(host_ctx, 1, devalloc_v, N_VERTS, 3, 1);
         loaded_kernels.floor_bound_kernel->launch(&host_ctx);
         vulkan_runtime->synchronize();
-#ifdef ONLY_INIT
-        set_ctx_arg_devalloc(host_ctx, 0, devalloc_x, N_VERTS, 3, 1);
-        set_ctx_arg_devalloc(host_ctx, 1, devalloc_v, N_VERTS, 3, 1);
-        set_ctx_arg_devalloc(host_ctx, 2, devalloc_f, N_VERTS, 3, 1);
-        set_ctx_arg_devalloc(host_ctx, 3, devalloc_ox, N_VERTS, 3, 1);
-        set_ctx_arg_devalloc(host_ctx, 4, devalloc_vertices, N_CELLS, 4, 1);
-        loaded_kernels.init_kernel->launch(&host_ctx);
-        print_debug(vulkan_runtime, devalloc_x, 0);
 #endif
 
     // Render elements
