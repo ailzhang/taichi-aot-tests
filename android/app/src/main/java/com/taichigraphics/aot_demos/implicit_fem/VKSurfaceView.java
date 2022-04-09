@@ -21,6 +21,9 @@ import android.content.res.AssetManager;
 import android.view.SurfaceHolder;
 import android.view.Surface;
 import android.view.SurfaceView;
+import android.os.Bundle;
+import android.util.Log;
+
 
 import androidx.annotation.NonNull;
 
@@ -35,6 +38,14 @@ public class VKSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
         sensor = new AccelerationSensor(context);
+
+        int tid=android.os.Process.myTid();
+
+        Log.i(TAG,"priority before change = " + android.os.Process.getThreadPriority(tid));
+        // Log.d(TAG,"priority before change = "+Thread.currentThread().getPriority());
+        // android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_DISPLAY);
+        // Log.d(TAG,"priority after change = " + android.os.Process.getThreadPriority(tid));
+        // Log.d(TAG,"priority after change = " + Thread.currentThread().getPriority());
     }
 
     // @TODO: Define a Renderer Class instead of calling the NativeLib directly like the GLSurfaceView
