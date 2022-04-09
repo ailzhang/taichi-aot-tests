@@ -13,7 +13,7 @@
 
 #include "data.h"
 
-constexpr float DT = 2.5e-3;
+constexpr float DT = 7.5e-3;
 constexpr int NUM_SUBSTEPS = 5;
 
 void set_ctx_arg_devalloc(taichi::lang::RuntimeContext& host_ctx, int arg_id,
@@ -293,7 +293,7 @@ class FemApp {
       loaded_kernels_.init_r_2_kernel->launch(&host_ctx_);
 
       constexpr int CG_ITERS = 2;
-      for (int i = 0; i < CG_ITERES; i++) {
+      for (int i = 0; i < CG_ITERS; i++) {
         // matmul_edge(mul_ans, p0, edges);
         set_ctx_arg_devalloc(host_ctx_, 0, devalloc_mul_ans_, N_VERTS, 3, 1);
         set_ctx_arg_devalloc(host_ctx_, 1, devalloc_p0_, N_VERTS, 3, 1);
