@@ -309,21 +309,60 @@ def run_aot():
     pathlib.Path(dir_name).mkdir(parents=True, exist_ok=False)
 
     mod = ti.aot.Module(ti.vulkan)
-    mod.add_kernel(get_force, (x, f, vertices))
-    mod.add_kernel(init, (x, v, f, ox, vertices))
-    mod.add_kernel(floor_bound, (x, v))
-    mod.add_kernel(get_matrix, (c2e, vertices))
-    mod.add_kernel(matmul_edge, (mul_ans, x, edges))
-    mod.add_kernel(add, (x, x, v))
-    mod.add_kernel(add_scalar_ndarray, (x, x, alpha_scalar, v))
-    mod.add_kernel(dot2scalar, (r0, r0))
-    mod.add_kernel(get_b, (v, b, f))
-    mod.add_kernel(ndarray_to_ndarray, (p0, r0))
-    mod.add_kernel(fill_ndarray, (f, ))
+    mod.add_kernel(get_force,
+                   template_args={
+                       'x': x,
+                       'f': f,
+                       'vertices': vertices
+                   })
+    mod.add_kernel(init,
+                   template_args={
+                       'x': x,
+                       'v': v,
+                       'f': f,
+                       'ox': ox,
+                       'vertices': vertices
+                   })
+    mod.add_kernel(floor_bound, template_args={'x': x, 'v': v})
+    mod.add_kernel(get_matrix,
+                   template_args={
+                       'c2e': c2e,
+                       'vertices': vertices
+                   })
+    mod.add_kernel(matmul_edge,
+                   template_args={
+                       'ret': mul_ans,
+                       'vel': x,
+                       'edges': edges
+                   })
+    mod.add_kernel(add, template_args={'ans': x, 'a': x, 'b': v})
+    mod.add_kernel(add_scalar_ndarray,
+                   template_args={
+                       'ans': x,
+                       'a': x,
+                       'scalar': alpha_scalar,
+                       'b': v
+                   })
+    mod.add_kernel(dot2scalar, template_args={'a': r0, 'b': r0})
+    mod.add_kernel(get_b, template_args={'v': v, 'b': b, 'f': f})
+    mod.add_kernel(ndarray_to_ndarray,
+                   template_args={
+                       'ndarray': p0,
+                       'other': r0
+                   })
+    mod.add_kernel(fill_ndarray, template_args={
+        'ndarray': f,
+    })
     mod.add_kernel(clear_field)
     mod.add_kernel(init_r_2)
-    mod.add_kernel(update_alpha, (alpha_scalar, ))
-    mod.add_kernel(update_beta_r_2, (beta_scalar, ))
+    mod.add_kernel(update_alpha,
+                   template_args={
+                       'alpha_scalar': alpha_scalar,
+                   })
+    mod.add_kernel(update_beta_r_2,
+                   template_args={
+                       'beta_scalar': beta_scalar,
+                   })
     mod.save(dir_name, '')
     print('AOT done')
 
