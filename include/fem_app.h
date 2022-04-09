@@ -173,7 +173,7 @@ class FemApp {
     vulkan_runtime =
         std::make_unique<taichi::lang::vulkan::VkRuntime>(std::move(params));
 
-    std::string shader_source = path_prefix + "/aot_shaders/implicit_fem";
+    std::string shader_source = path_prefix + "/shaders/aot/implicit_fem";
     taichi::lang::vulkan::AotModuleParams aot_params{shader_source,
                                                      vulkan_runtime.get()};
     module = taichi::lang::aot::Module::load(taichi::Arch::vulkan, aot_params);
@@ -281,9 +281,9 @@ class FemApp {
 
     {
       auto vert_code =
-          taichi::ui::read_file(path_prefix + "/rhi_shaders/surface.vert.spv");
+          taichi::ui::read_file(path_prefix + "/shaders/render/surface.vert.spv");
       auto frag_code =
-          taichi::ui::read_file(path_prefix + "/rhi_shaders/surface.frag.spv");
+          taichi::ui::read_file(path_prefix + "/shaders/render/surface.frag.spv");
 
       std::vector<PipelineSourceDesc> source(2);
       source[0] = {PipelineSourceType::spirv_binary, frag_code.data(),

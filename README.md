@@ -22,8 +22,7 @@ export TAICHI_REPO_DIR=/path/github/taichi/
 cd android
 ./gradlew assembleDebug
 adb install ./app/build/outputs/apk/debug/app-debug.apk
-adb push ../aot_shaders /data/local/tmp/
-adb push ../rhi_shaders /data/local/tmp/
+adb push ../shaders /data/local/tmp/
 adb shell chmod -R 777 /data/local/tmp/
 ```
 
