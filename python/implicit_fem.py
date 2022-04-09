@@ -34,7 +34,7 @@ n_verts = ox_np.shape[0]
 n_cells = c2e_np.shape[0]
 n_faces = indices_np.shape[0]
 
-E, nu = 5e4, 0.0
+E, nu = 5e5, 0.0
 mu, la = E / (2 * (1 + nu)), E * nu / ((1 + nu) * (1 - 2 * nu))  # lambda = 0
 density = 1000.0
 epsilon = 1e-5

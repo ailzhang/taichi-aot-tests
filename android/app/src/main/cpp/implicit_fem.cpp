@@ -77,9 +77,9 @@ Java_com_taichigraphics_aot_1demos_implicit_1fem_NativeLib_render(JNIEnv *env, j
                                                           float g_x, float g_y,
                                                           float g_z) {
   ALOGI("Acceleration: g_x = %f, g_y = %f, g_z = %f", g_x, g_y, g_z);
-  float a_x = g_x > 2 || g_x < -2 ? -g_x * 4 : 0;
-  float a_y = g_y > 2 || g_y < -2 ? -g_y * 4 : 0;
-  float a_z = g_z > 2 || g_z < -2 ? -g_z * 4 : 0;
+  float a_x = g_x > 2 || g_x < -2 ? -g_x * 8 : 0;
+  float a_y = g_y > 2 || g_y < -2 ? -g_y * 8 : 0;
+  float a_z = g_z > 2 || g_z < -2 ? -g_z * 8 : 0;
 
   app->run_render_loop(a_x, a_y, a_z);
 }
