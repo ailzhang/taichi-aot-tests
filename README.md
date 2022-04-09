@@ -16,14 +16,13 @@ shaders/
 export TAICHI_REPO_DIR=/path/github/taichi/
 cd desktop
 mkdir build
-cd build
-cmake ..
-make
+cd build && cmake .. && make
 ```
 
 Taichi built with
+
 ```
-TAICHI_CMAKE_ARGS="-DTI_WITH_VULKAN:BOOL=ON -DTI_WITH_CUDA:BOOL=OFF -DTI_WITH_OPENGL:BOOL=OFF -DTI_WITH_LLVM:BOOL=OFF -DTI_EXPORT_CORE:BOOL=ON -DTI_WITH_LLVM:BOOL=OFF" python3 setup.py build_ext
+python setup.py clean && TAICHI_CMAKE_ARGS="-DTI_WITH_VULKAN:BOOL=ON -DTI_WITH_CUDA:BOOL=OFF -DTI_WITH_OPENGL:BOOL=OFF -DTI_WITH_LLVM:BOOL=OFF -DTI_EXPORT_CORE:BOOL=ON -DTI_WITH_LLVM:BOOL=OFF" python3 setup.py build_ext
 ```
 
 ## Android Demo
@@ -39,11 +38,15 @@ adb shell chmod -R 777 /data/local/tmp/
 
 Taichi built with
 ```
-TAICHI_CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=${ANDROID_SDK_ROOT}/ndk/22.1.7171670/build/cmake/android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL=29 -DANDROID_ABI=arm64-v8a -DTI_WITH_VULKAN:BOOL=ON -DTI_WITH_CUDA:BOOL=OFF -DTI_WITH_OPENGL:BOOL=OFF -DTI_WITH_LLVM:BOOL=OFF -DTI_EXPORT_CORE:BOOL=ON" python3 setup.py build_ext
+python setup.py clean && TAICHI_CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=${ANDROID_SDK_ROOT}/ndk/22.1.7171670/build/cmake/android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL=29 -DANDROID_ABI=arm64-v8a -DTI_WITH_VULKAN:BOOL=ON -DTI_WITH_CUDA:BOOL=OFF -DTI_WITH_OPENGL:BOOL=OFF -DTI_WITH_LLVM:BOOL=OFF -DTI_EXPORT_CORE:BOOL=ON" python3 setup.py build_ext
 ```
 
-## Android Monitor Logs
+## Troubleshooting
+
+- Note that if you built for the desktop demo first and then decide to cross-compile to android, the manual cleanup (`python setup.py clean`) is required. CMake cannot automatically adjust build directory from one build type to another. More details can be found at [this stackoverflow question](https://stackoverflow.com/questions/40528254/how-do-i-detect-that-i-am-cross-compiling-in-cmakelists-txt).
+
+- Monitor Android logs
 
 ```
-adb logcat -s "TaichiTest" "*:F" "AndroidRuntime" vulkan VALIDATION
+adb logcat -s "TaichiTest" "*:F" "AndroidRuntime" vulkan taichi VALIDATION
 ```
