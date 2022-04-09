@@ -489,7 +489,7 @@ class FemApp {
   taichi::lang::DeviceAllocation devalloc_b_eta_scalar_;
 
   std::unique_ptr<taichi::lang::Surface> surface_{nullptr};
-  std::unique_ptr<taichi::lang::Pipeline> render_mesh_pipeline_;
+  std::unique_ptr<taichi::lang::Pipeline> render_mesh_pipeline_{nullptr};
   taichi::lang::DeviceAllocation depth_allocation_;
   taichi::lang::DeviceAllocation render_constants_;
 };
