@@ -4,3 +4,6 @@ android/app/.cxx
 android/app/build
 desktop/build
 .vscode
+__pycache__/
+*.pyc
+python/imgui.ini

@@ -7,10 +7,6 @@
 #include <taichi/gui/gui.h>
 #include <taichi/inc/constants.h>
 #include <taichi/ui/backends/vulkan/renderer.h>
-constexpr int N_VERTS = 616;
-constexpr int N_CELLS = 1770;
-constexpr int N_FACES = 1138;
-constexpr int N_EDGES = 2954;
 constexpr float dt = 7.5e-3;
 
 //#define ONLY_INIT
@@ -86,7 +82,7 @@ struct ImplicitFemKernels {
   taichi::lang::aot::Kernel* add_kernel;
   taichi::lang::aot::Kernel* update_alpha_kernel;
   taichi::lang::aot::Kernel* update_beta_r_2_kernel;
-  taichi::lang::aot::Kernel* add_hack_kernel;
+  taichi::lang::aot::Kernel* add_scalar_ndarray_kernel;
   taichi::lang::aot::Kernel* dot2scalar_kernel;
   taichi::lang::aot::Kernel* init_r_2_kernel;
   taichi::lang::aot::Kernel* get_matrix_kernel;
@@ -187,7 +183,7 @@ class FemApp {
     loaded_kernels.get_matrix_kernel = module->get_kernel("get_matrix");
     loaded_kernels.matmul_edge_kernel = module->get_kernel("matmul_edge");
     loaded_kernels.add_kernel = module->get_kernel("add");
-    loaded_kernels.add_hack_kernel = module->get_kernel("add_hack");
+    loaded_kernels.add_scalar_ndarray_kernel = module->get_kernel("add_scalar_ndarray");
     loaded_kernels.dot2scalar_kernel = module->get_kernel("dot2scalar");
     loaded_kernels.get_b_kernel = module->get_kernel("get_b");
     loaded_kernels.ndarray_to_ndarray_kernel =
@@ -369,14 +365,14 @@ class FemApp {
         set_ctx_arg_float(host_ctx, 2, 1.0f);
         set_ctx_arg_devalloc(host_ctx, 3, devalloc_alpha_scalar, 1, 1, 1);
         set_ctx_arg_devalloc(host_ctx, 4, devalloc_p0, N_VERTS, 3, 1);
-        loaded_kernels.add_hack_kernel->launch(&host_ctx);
+        loaded_kernels.add_scalar_ndarray_kernel->launch(&host_ctx);
         // add(r0, r0, -alpha, mul_ans)
         set_ctx_arg_devalloc(host_ctx, 0, devalloc_r0, N_VERTS, 3, 1);
         set_ctx_arg_devalloc(host_ctx, 1, devalloc_r0, N_VERTS, 3, 1);
         set_ctx_arg_float(host_ctx, 2, -1.0f);
         set_ctx_arg_devalloc(host_ctx, 3, devalloc_alpha_scalar, 1, 1, 1);
         set_ctx_arg_devalloc(host_ctx, 4, devalloc_mul_ans, N_VERTS, 3, 1);
-        loaded_kernels.add_hack_kernel->launch(&host_ctx);
+        loaded_kernels.add_scalar_ndarray_kernel->launch(&host_ctx);
 
         // r_2_new = dot(r0, r0)
         set_ctx_arg_devalloc(host_ctx, 0, devalloc_r0, N_VERTS, 3, 1);
@@ -392,7 +388,7 @@ class FemApp {
         set_ctx_arg_float(host_ctx, 2, 1.0f);
         set_ctx_arg_devalloc(host_ctx, 3, devalloc_beta_scalar, 1, 1, 1);
         set_ctx_arg_devalloc(host_ctx, 4, devalloc_p0, N_VERTS, 3, 1);
-        loaded_kernels.add_hack_kernel->launch(&host_ctx);
+        loaded_kernels.add_scalar_ndarray_kernel->launch(&host_ctx);
       }
 
       // fill_ndarray(f, 0)
