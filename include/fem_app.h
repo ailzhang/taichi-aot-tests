@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "box_data.h"
-#include "data.h"
+#include "mesh_data.h"
 
 constexpr float DT = 5e-3;
 constexpr int NUM_SUBSTEPS = 2;
