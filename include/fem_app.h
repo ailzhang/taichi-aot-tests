@@ -236,7 +236,7 @@ class FemApp {
                    vert_code.size(), PipelineStageType::vertex};
 
       RasterParams raster_params;
-      raster_params.prim_topology = TopologyType::Triangles;
+      raster_params.prim_topology = TopologyType::Lines;
       raster_params.polygon_mode = PolygonMode::Line;
       raster_params.depth_test = true;
       raster_params.depth_write = true;
