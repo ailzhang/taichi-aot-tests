@@ -11,6 +11,7 @@
 #include <memory>
 #include <vector>
 
+#include "box_data.h"
 #include "data.h"
 
 constexpr float DT = 5e-3;
@@ -46,7 +47,8 @@ void unmap(taichi::lang::vulkan::VkRuntime& vulkan_runtime,
 }
 
 void load_data(taichi::lang::vulkan::VkRuntime* vulkan_runtime,
-               taichi::lang::DeviceAllocation& alloc, void* data, size_t size) {
+               taichi::lang::DeviceAllocation& alloc, const void* data,
+               size_t size) {
   char* const device_arr_ptr =
       reinterpret_cast<char*>(vulkan_runtime->get_ti_device()->map(alloc));
   std::memcpy(device_arr_ptr, data, size);
@@ -224,6 +226,48 @@ class FemApp {
     {
       auto vert_code = taichi::ui::read_file(
           path_prefix + "/shaders/render/surface.vert.spv");
+      auto frag_code =
+          taichi::ui::read_file(path_prefix + "/shaders/render/box.frag.spv");
+
+      std::vector<PipelineSourceDesc> source(2);
+      source[0] = {PipelineSourceType::spirv_binary, frag_code.data(),
+                   frag_code.size(), PipelineStageType::fragment};
+      source[1] = {PipelineSourceType::spirv_binary, vert_code.data(),
+                   vert_code.size(), PipelineStageType::vertex};
+
+      RasterParams raster_params;
+      raster_params.prim_topology = TopologyType::Lines;
+      raster_params.polygon_mode = PolygonMode::Line;
+      raster_params.depth_test = true;
+      raster_params.depth_write = true;
+
+      std::vector<VertexInputBinding> vertex_inputs = {
+          {/*binding=*/0, /*stride=*/3 * sizeof(float), /*instance=*/false}};
+      std::vector<VertexInputAttribute> vertex_attribs;
+      vertex_attribs.push_back({/*location=*/0, /*binding=*/0,
+                                /*format=*/BufferFormat::rgb32f,
+                                /*offset=*/0});
+
+      render_box_pipeline_ = device_->create_raster_pipeline(
+          source, raster_params, vertex_inputs, vertex_attribs);
+
+      alloc_params = Device::AllocParams{};
+      alloc_params.host_write = true;
+      // x
+      alloc_params.size = sizeof(kBoxVertices);
+      alloc_params.usage = taichi::lang::AllocUsage::Vertex;
+      devalloc_box_verts_ = device_->allocate_memory(alloc_params);
+      alloc_params.size = sizeof(kBoxIndices);
+      alloc_params.usage = taichi::lang::AllocUsage::Index;
+      devalloc_box_indices_ = device_->allocate_memory(alloc_params);
+      load_data(vulkan_runtime_.get(), devalloc_box_verts_, kBoxVertices,
+                sizeof(kBoxVertices));
+      load_data(vulkan_runtime_.get(), devalloc_box_indices_, kBoxIndices,
+                sizeof(kBoxIndices));
+    }
+    {
+      auto vert_code = taichi::ui::read_file(
+          path_prefix + "/shaders/render/surface.vert.spv");
       auto frag_code = taichi::ui::read_file(
           path_prefix + "/shaders/render/surface.frag.spv");
 
@@ -372,10 +416,28 @@ class FemApp {
     constants->proj = glm::perspective(
         glm::radians(55.0f), float(width_) / float(height_), 0.1f, 10.0f);
     constants->proj[1][1] *= -1.0f;
-    constants->view = glm::lookAt(glm::vec3(0.0, 1.5, 2.95), glm::vec3(0, 0, 0),
-                                  glm::vec3(0, 1, 0));
+#ifdef ANDROID
+    constexpr float kCameraZ = 5.0f;
+#else
+    constexpr float kCameraZ = 2.95f;
+#endif
+    constants->view = glm::lookAt(glm::vec3(0.0, 0.0, kCameraZ),
+                                  glm::vec3(0, 0, 0), glm::vec3(0, 1.0, 0));
     device_->unmap(render_constants_);
 
+    // Draw box
+    {
+      auto resource_binder = render_box_pipeline_->resource_binder();
+      resource_binder->buffer(0, 0, render_constants_.get_ptr(0));
+      resource_binder->vertex_buffer(devalloc_box_verts_.get_ptr(0));
+      resource_binder->index_buffer(devalloc_box_indices_.get_ptr(0), 32);
+
+      cmd_list->bind_pipeline(render_box_pipeline_.get());
+      cmd_list->bind_resources(resource_binder);
+      constexpr int num_indices =
+          sizeof(kBoxIndices) / sizeof(kBoxIndices[0][0]);
+      cmd_list->draw_indexed(num_indices);
+    }
     // Draw mesh
     {
       auto resource_binder = render_mesh_pipeline_->resource_binder();
@@ -475,7 +537,10 @@ class FemApp {
   taichi::lang::DeviceAllocation devalloc_b_eta_scalar_;
 
   std::unique_ptr<taichi::lang::Surface> surface_{nullptr};
+  std::unique_ptr<taichi::lang::Pipeline> render_box_pipeline_{nullptr};
   std::unique_ptr<taichi::lang::Pipeline> render_mesh_pipeline_{nullptr};
+  taichi::lang::DeviceAllocation devalloc_box_verts_;
+  taichi::lang::DeviceAllocation devalloc_box_indices_;
   taichi::lang::DeviceAllocation depth_allocation_;
   taichi::lang::DeviceAllocation render_constants_;
 };
