@@ -416,7 +416,7 @@ class FemApp {
     constants->proj = glm::perspective(
         glm::radians(55.0f), float(width_) / float(height_), 0.1f, 10.0f);
     constants->proj[1][1] *= -1.0f;
-    constants->view = glm::lookAt(glm::vec3(0.0, 1.5, 2.95), glm::vec3(0, 0, 0),
+    constants->view = glm::lookAt(glm::vec3(0.0, 0.0, 2.95), glm::vec3(0, 0, 0),
                                   glm::vec3(0, 1, 0));
     device_->unmap(render_constants_);
 
