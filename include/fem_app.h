@@ -173,7 +173,7 @@ class FemApp {
     vulkan_runtime =
         std::make_unique<taichi::lang::vulkan::VkRuntime>(std::move(params));
 
-    std::string shader_source = path_prefix + "/implicit_mesh_fem";
+    std::string shader_source = path_prefix + "/aot_shaders/implicit_fem";
     taichi::lang::vulkan::AotModuleParams aot_params{shader_source,
                                                      vulkan_runtime.get()};
     module = taichi::lang::aot::Module::load(taichi::Arch::vulkan, aot_params);
