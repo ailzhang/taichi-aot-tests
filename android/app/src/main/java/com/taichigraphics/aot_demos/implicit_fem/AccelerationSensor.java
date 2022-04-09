@@ -1,4 +1,4 @@
-package com.innopeaktech.naboo.taichi_test;
+package com.taichigraphics.aot_demos.implicit_fem;
 
 import android.content.Context;
 import android.hardware.Sensor;

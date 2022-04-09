@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.innopeaktech.naboo.taichi_test;
+package com.taichigraphics.aot_demos.implicit_fem;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.opengl.GLSurfaceView;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.Surface;
 import android.view.SurfaceView;
@@ -268,7 +266,7 @@ public class VKSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
 class NativeLib {
     static {
-        System.loadLibrary("taichi-test-native");
+        System.loadLibrary("taichi-implicit-fem");
     }
 
     public static native void init(AssetManager assets, Surface surface);

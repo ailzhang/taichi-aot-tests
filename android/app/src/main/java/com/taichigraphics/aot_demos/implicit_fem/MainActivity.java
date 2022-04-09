@@ -1,4 +1,4 @@
-package com.innopeaktech.naboo.taichi_test;
+package com.taichigraphics.aot_demos.implicit_fem;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;

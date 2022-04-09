@@ -22,7 +22,7 @@ android {
     ndkVersion '22.1.7171670'
 
     defaultConfig {
-        applicationId 'com.innopeaktech.naboo.taichi_test'
+        applicationId 'com.taichigraphics.aot_demos.implicit_fem'
         minSdkVersion "${platformVersion}"
         targetSdkVersion 29
         externalNativeBuild {
