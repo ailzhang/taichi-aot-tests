@@ -1,8 +1,9 @@
-import argparse, re, pathlib, shutil, os
+import argparse
+import os
+import pathlib
+import shutil
 
 import numpy as np
-from taichi._lib import core as _ti_core
-
 import taichi as ti
 
 parser = argparse.ArgumentParser()
@@ -15,11 +16,18 @@ args = parser.parse_args()
 # TODO: asserts cuda or vulkan backend
 ti.init(arch=ti.vulkan)
 
-c2e_np = np.load('c2e.npy')
-vertices_np = np.load('vertices_np.npy')
-indices_np = np.load('indices_np.npy')
-edges_np = np.load('edges_np.npy')
-ox_np = np.load('ox_np.npy')
+SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
+
+
+def get_rel_path(*segs):
+    return os.path.join(SCRIPT_PATH, *segs)
+
+
+c2e_np = np.load(get_rel_path('c2e.npy'))
+vertices_np = np.load(get_rel_path('vertices_np.npy'))
+indices_np = np.load(get_rel_path('indices_np.npy'))
+edges_np = np.load(get_rel_path('edges_np.npy'))
+ox_np = np.load(get_rel_path('ox_np.npy'))
 
 n_edges = edges_np.shape[0]
 n_verts = ox_np.shape[0]
@@ -30,8 +38,7 @@ E, nu = 5e4, 0.0
 mu, la = E / (2 * (1 + nu)), E * nu / ((1 + nu) * (1 - 2 * nu))  # lambda = 0
 density = 1000.0
 dt = 2.5e-3
-
-num_substep = int(1e-2 / dt + 0.5)
+num_substeps = int(1e-2 / dt + 0.5)
 
 x = ti.Vector.ndarray(args.dim, dtype=ti.f32, shape=n_verts)
 v = ti.Vector.ndarray(args.dim, dtype=ti.f32, shape=n_verts)
@@ -174,7 +181,7 @@ def add(ans: ti.any_arr(), a: ti.any_arr(), k: ti.f32, b: ti.any_arr()):
 
 @ti.kernel
 def add_scalar_ndarray(ans: ti.any_arr(), a: ti.any_arr(), k: ti.f32,
-             scalar: ti.any_arr(), b: ti.any_arr()):
+                       scalar: ti.any_arr(), b: ti.any_arr()):
     for i in ans:
         ans[i] = a[i] + k * scalar[None] * b[i]
 
@@ -283,17 +290,20 @@ def floor_bound(x: ti.any_arr(), v: ti.any_arr()):
 
 
 def substep():
-    for i in range(num_substep):
+    for i in range(num_substeps):
         cg(i)
     floor_bound(x, v)
 
 
 def run_aot():
-    dir_name = '../shaders/aot/implicit_fem'
+    cwd = os.getcwd()
+    if cwd != SCRIPT_PATH:
+        raise RuntimeError(f'AOT must be done in the script path {SCRIPT_PATH}')
+    dir_name = os.path.join('..', 'shaders', 'aot', 'implicit_fem')
     shutil.rmtree(dir_name, ignore_errors=True)
     pathlib.Path(dir_name).mkdir(parents=True, exist_ok=False)
 
-    mod = ti.aot.Module(ti.metal)
+    mod = ti.aot.Module(ti.vulkan)
     mod.add_kernel(get_force, (x, f, vertices))
     mod.add_kernel(init, (x, v, f, ox, vertices))
     mod.add_kernel(floor_bound, (x, v))
@@ -323,7 +333,6 @@ def run_ggui():
     res = (800, 600)
     window = ti.ui.Window("Implicit FEM", res, vsync=True)
 
-    frame_id = 0
     canvas = window.get_canvas()
     scene = ti.ui.Scene()
     camera = ti.ui.make_camera()
@@ -366,8 +375,6 @@ def run_ggui():
         canvas.scene(scene)
 
     while window.running:
-        frame_id += 1
-        frame_id = frame_id % 256
         substep()
         if window.is_pressed('r'):
             init(x, v, f)
@@ -402,7 +409,7 @@ def generate_data_header_file_for_aot():
                 f.write(str(t(x[i])) + ',')
             f.write('};\n')
 
-    data_header_path = '../include/data.h'
+    data_header_path = get_rel_path('..', 'include', 'data.h')
     if os.path.exists(data_header_path):
         os.remove(data_header_path)
     with open(data_header_path, 'w') as f:
@@ -418,6 +425,7 @@ def generate_data_header_file_for_aot():
 
 
 if __name__ == '__main__':
+    print(f'dt={dt} num_substeps={num_substeps}')
     if args.aot:
         run_aot()
         generate_data_header_file_for_aot()

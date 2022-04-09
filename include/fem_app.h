@@ -13,7 +13,8 @@
 
 #include "data.h"
 
-constexpr float kDt = 7.5e-3;
+constexpr float DT = 2.5e-3;
+constexpr int NUM_SUBSTEPS = 5;
 
 void set_ctx_arg_devalloc(taichi::lang::RuntimeContext& host_ctx, int arg_id,
                           taichi::lang::DeviceAllocation& alloc, int x, int y,
@@ -157,56 +158,42 @@ class FemApp {
     alloc_params.size = N_VERTS * 3 * sizeof(float);
     alloc_params.usage =
         taichi::lang::AllocUsage::Vertex | taichi::lang::AllocUsage::Storage;
-    devalloc_x_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_x_ = device_->allocate_memory(alloc_params);
     alloc_params.usage = taichi::lang::AllocUsage::Storage;
     // v
-    devalloc_v_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_v_ = device_->allocate_memory(alloc_params);
     // f
-    devalloc_f_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_f_ = device_->allocate_memory(alloc_params);
     // mul_ans
-    devalloc_mul_ans_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_mul_ans_ = device_->allocate_memory(alloc_params);
     // c2e
     alloc_params.size = N_CELLS * 6 * sizeof(int);
-    devalloc_c2e_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_c2e_ = device_->allocate_memory(alloc_params);
     // b
     alloc_params.size = N_VERTS * 3 * sizeof(float);
-    devalloc_b_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_b_ = device_->allocate_memory(alloc_params);
     // r0
-    devalloc_r0_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_r0_ = device_->allocate_memory(alloc_params);
     // p0
-    devalloc_p0_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_p0_ = device_->allocate_memory(alloc_params);
     // indices
     alloc_params.size = N_FACES * 3 * sizeof(int);
     alloc_params.usage = taichi::lang::AllocUsage::Index;
-    devalloc_indices_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_indices_ = device_->allocate_memory(alloc_params);
     alloc_params.usage = taichi::lang::AllocUsage::Storage;
     // vertices
     alloc_params.size = N_CELLS * 4 * sizeof(int);
-    devalloc_v_ertices_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_v_ertices_ = device_->allocate_memory(alloc_params);
     // edges
     alloc_params.size = N_EDGES * 2 * sizeof(int);
-    devalloc_edges_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_edges_ = device_->allocate_memory(alloc_params);
     // ox
     alloc_params.size = N_VERTS * 3 * sizeof(float);
-    devalloc_ox_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_ox_ = device_->allocate_memory(alloc_params);
 
     alloc_params.size = sizeof(float);
-    devalloc_alpha_scalar_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
-    devalloc_b_eta_scalar_ =
-        vulkan_runtime_->get_ti_device()->allocate_memory(alloc_params);
+    devalloc_alpha_scalar_ = device_->allocate_memory(alloc_params);
+    devalloc_b_eta_scalar_ = device_->allocate_memory(alloc_params);
 
     load_data(vulkan_runtime_.get(), devalloc_indices_, indices_data,
               sizeof(indices_data));
@@ -266,16 +253,16 @@ class FemApp {
         {sizeof(RenderConstants), true, false, false, AllocUsage::Uniform});
   }
 
-  void run_render_loop(float a_x = 0, float a_y = -9.8, float a_z = 0) {
+  void run_render_loop(float g_x = 0, float g_y = -9.8, float g_z = 0) {
     using namespace taichi::lang;
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < NUM_SUBSTEPS; i++) {
       // get_force(x, f, vertices)
       set_ctx_arg_devalloc(host_ctx_, 0, devalloc_x_, N_VERTS, 3, 1);
       set_ctx_arg_devalloc(host_ctx_, 1, devalloc_f_, N_VERTS, 3, 1);
       set_ctx_arg_devalloc(host_ctx_, 2, devalloc_v_ertices_, N_CELLS, 4, 1);
-      set_ctx_arg_float(host_ctx_, 3, a_x);
-      set_ctx_arg_float(host_ctx_, 4, a_y);
-      set_ctx_arg_float(host_ctx_, 5, a_z);
+      set_ctx_arg_float(host_ctx_, 3, g_x);
+      set_ctx_arg_float(host_ctx_, 4, g_y);
+      set_ctx_arg_float(host_ctx_, 5, g_z);
       loaded_kernels_.get_force_kernel->launch(&host_ctx_);
       // get_b(v, b, f)
       set_ctx_arg_devalloc(host_ctx_, 0, devalloc_v_, N_VERTS, 3, 1);
@@ -305,9 +292,8 @@ class FemApp {
       // init_r_2()
       loaded_kernels_.init_r_2_kernel->launch(&host_ctx_);
 
-      int n_iter = 2;
-
-      for (int i = 0; i < n_iter; i++) {
+      constexpr int CG_ITERS = 2;
+      for (int i = 0; i < CG_ITERES; i++) {
         // matmul_edge(mul_ans, p0, edges);
         set_ctx_arg_devalloc(host_ctx_, 0, devalloc_mul_ans_, N_VERTS, 3, 1);
         set_ctx_arg_devalloc(host_ctx_, 1, devalloc_p0_, N_VERTS, 3, 1);
@@ -359,7 +345,7 @@ class FemApp {
       // add(x, x, dt, v)
       set_ctx_arg_devalloc(host_ctx_, 0, devalloc_x_, N_VERTS, 3, 1);
       set_ctx_arg_devalloc(host_ctx_, 1, devalloc_x_, N_VERTS, 3, 1);
-      set_ctx_arg_float(host_ctx_, 2, kDt);
+      set_ctx_arg_float(host_ctx_, 2, DT);
       set_ctx_arg_devalloc(host_ctx_, 3, devalloc_v_, N_VERTS, 3, 1);
       loaded_kernels_.add_kernel->launch(&host_ctx_);
     }
