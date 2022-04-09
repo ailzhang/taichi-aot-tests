@@ -416,8 +416,13 @@ class FemApp {
     constants->proj = glm::perspective(
         glm::radians(55.0f), float(width_) / float(height_), 0.1f, 10.0f);
     constants->proj[1][1] *= -1.0f;
-    constants->view = glm::lookAt(glm::vec3(0.0, 0.0, 2.95), glm::vec3(0, 0, 0),
-                                  glm::vec3(0, 1, 0));
+#ifdef ANDROID
+    constexpr float kCameraZ = 5.0f;
+#else
+    constexpr float kCameraZ = 2.95f;
+#endif
+    constants->view = glm::lookAt(glm::vec3(0.0, 0.0, kCameraZ),
+                                  glm::vec3(0, 0, 0), glm::vec3(0, 1.0, 0));
     device_->unmap(render_constants_);
 
     // Draw box
