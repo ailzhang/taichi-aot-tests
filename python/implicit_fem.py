@@ -34,9 +34,10 @@ n_verts = ox_np.shape[0]
 n_cells = c2e_np.shape[0]
 n_faces = indices_np.shape[0]
 
-E, nu = 5e4, 0.0
+E, nu = 5e5, 0.0
 mu, la = E / (2 * (1 + nu)), E * nu / ((1 + nu) * (1 - 2 * nu))  # lambda = 0
 density = 1000.0
+epsilon = 1e-5
 dt = 2.5e-3
 num_substeps = int(1e-2 / dt + 0.5)
 
@@ -87,7 +88,7 @@ def clear_field():
 
 @ti.func
 def Ds(verts, x: ti.template()):
-    return ti.Matrix.cols([x[verts[i]] - x[verts[3]] + 1e-5 for i in range(3)])
+    return ti.Matrix.cols([x[verts[i]] - x[verts[3]] + epsilon for i in range(3)])
 
 
 @ti.func
@@ -218,12 +219,12 @@ def init_r_2():
 
 @ti.kernel
 def update_alpha(alpha_scalar: ti.any_arr()):
-    alpha_scalar[None] = r_2_scalar[None] / dot_ans[None]
+    alpha_scalar[None] = r_2_scalar[None] / (dot_ans[None] + epsilon)
 
 
 @ti.kernel
 def update_beta_r_2(beta_scalar: ti.any_arr()):
-    beta_scalar[None] = dot_ans[None] / r_2_scalar[None]
+    beta_scalar[None] = dot_ans[None] / (r_2_scalar[None] + epsilon)
     r_2_scalar[None] = dot_ans[None]
 
 
@@ -237,8 +238,8 @@ def cg(it):
     ndarray_to_ndarray(p0, r0)
     dot2scalar(r0, r0)
     init_r_2()
-    n_iter = 10
-    for iter in range(n_iter):
+    CG_ITERS = 10
+    for _ in range(CG_ITERS):
         matmul_edge(mul_ans, p0, edges)
         dot2scalar(p0, mul_ans)
         update_alpha(alpha_scalar)
