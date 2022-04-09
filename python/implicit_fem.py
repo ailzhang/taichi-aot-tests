@@ -11,8 +11,6 @@ parser.add_argument('--dim', type=int, default=3)
 parser.add_argument('--aot', default=False, action='store_true')
 args = parser.parse_args()
 
-# FIXME: ndarray annotation
-
 # TODO: asserts cuda or vulkan backend
 ti.init(arch=ti.vulkan)
 
@@ -88,7 +86,8 @@ def clear_field():
 
 @ti.func
 def Ds(verts, x: ti.template()):
-    return ti.Matrix.cols([x[verts[i]] - x[verts[3]] + epsilon for i in range(3)])
+    return ti.Matrix.cols(
+        [x[verts[i]] - x[verts[3]] + epsilon for i in range(3)])
 
 
 @ti.func
@@ -119,8 +118,9 @@ def get_force_func(c, verts, x: ti.template(), f: ti.template()):
 
 
 @ti.kernel
-def get_force(x: ti.any_arr(), f: ti.any_arr(), vertices: ti.any_arr(),
-              g_x: ti.f32, g_y: ti.f32, g_z: ti.f32):
+def get_force(
+        x: ti.types.ndarray(), f: ti.types.ndarray(),
+        vertices: ti.types.ndarray(), g_x: ti.f32, g_y: ti.f32, g_z: ti.f32):
     for c in vertices:
         get_force_func(c, vertices[c], x, f)
     for u in f:
@@ -129,7 +129,7 @@ def get_force(x: ti.any_arr(), f: ti.any_arr(), vertices: ti.any_arr(),
 
 
 @ti.kernel
-def get_matrix(c2e: ti.any_arr(), vertices: ti.any_arr()):
+def get_matrix(c2e: ti.types.ndarray(), vertices: ti.types.ndarray()):
     for c in vertices:
         verts = vertices[c]
         W_c = W[c]
@@ -164,7 +164,8 @@ def get_matrix(c2e: ti.any_arr(), vertices: ti.any_arr()):
 
 
 @ti.kernel
-def matmul_edge(ret: ti.any_arr(), vel: ti.any_arr(), edges: ti.any_arr()):
+def matmul_edge(ret: ti.types.ndarray(), vel: ti.types.ndarray(),
+                edges: ti.types.ndarray()):
     for i in ret:
         ret[i] = vel[i] * m[i] + hes_vert[i] * vel[i]
     for e in edges:
@@ -175,39 +176,41 @@ def matmul_edge(ret: ti.any_arr(), vel: ti.any_arr(), edges: ti.any_arr()):
 
 
 @ti.kernel
-def add(ans: ti.any_arr(), a: ti.any_arr(), k: ti.f32, b: ti.any_arr()):
+def add(ans: ti.types.ndarray(), a: ti.types.ndarray(), k: ti.f32,
+        b: ti.types.ndarray()):
     for i in ans:
         ans[i] = a[i] + k * b[i]
 
 
 @ti.kernel
-def add_scalar_ndarray(ans: ti.any_arr(), a: ti.any_arr(), k: ti.f32,
-                       scalar: ti.any_arr(), b: ti.any_arr()):
+def add_scalar_ndarray(ans: ti.types.ndarray(), a: ti.types.ndarray(),
+                       k: ti.f32, scalar: ti.types.ndarray(),
+                       b: ti.types.ndarray()):
     for i in ans:
         ans[i] = a[i] + k * scalar[None] * b[i]
 
 
 @ti.kernel
-def dot2scalar(a: ti.any_arr(), b: ti.any_arr()):
+def dot2scalar(a: ti.types.ndarray(), b: ti.types.ndarray()):
     dot_ans[None] = 0.0
     for i in a:
         dot_ans[None] += a[i].dot(b[i])
 
 
 @ti.kernel
-def get_b(v: ti.any_arr(), b: ti.any_arr(), f: ti.any_arr()):
+def get_b(v: ti.types.ndarray(), b: ti.types.ndarray(), f: ti.types.ndarray()):
     for i in b:
         b[i] = m[i] * v[i] + dt * f[i]
 
 
 @ti.kernel
-def ndarray_to_ndarray(ndarray: ti.any_arr(), other: ti.any_arr()):
+def ndarray_to_ndarray(ndarray: ti.types.ndarray(), other: ti.types.ndarray()):
     for I in ti.grouped(ndarray):
         ndarray[I] = other[I]
 
 
 @ti.kernel
-def fill_ndarray(ndarray: ti.any_arr(), val: ti.f32):
+def fill_ndarray(ndarray: ti.types.ndarray(), val: ti.f32):
     for I in ti.grouped(ndarray):
         ndarray[I] = [val, val, val]
 
@@ -218,12 +221,12 @@ def init_r_2():
 
 
 @ti.kernel
-def update_alpha(alpha_scalar: ti.any_arr()):
+def update_alpha(alpha_scalar: ti.types.ndarray()):
     alpha_scalar[None] = r_2_scalar[None] / (dot_ans[None] + epsilon)
 
 
 @ti.kernel
-def update_beta_r_2(beta_scalar: ti.any_arr()):
+def update_beta_r_2(beta_scalar: ti.types.ndarray()):
     beta_scalar[None] = dot_ans[None] / (r_2_scalar[None] + epsilon)
     r_2_scalar[None] = dot_ans[None]
 
@@ -261,8 +264,8 @@ def advect():
 
 
 @ti.kernel
-def init(x: ti.any_arr(), v: ti.any_arr(), f: ti.any_arr(), ox: ti.any_arr(),
-         vertices: ti.any_arr()):
+def init(x: ti.types.ndarray(), v: ti.types.ndarray(), f: ti.types.ndarray(),
+         ox: ti.types.ndarray(), vertices: ti.types.ndarray()):
     for u in x:
         x[u] = ox[u]
         v[u] = [0.0] * 3
@@ -277,7 +280,7 @@ def init(x: ti.any_arr(), v: ti.any_arr(), f: ti.any_arr(), ox: ti.any_arr(),
 
 
 @ti.kernel
-def floor_bound(x: ti.any_arr(), v: ti.any_arr()):
+def floor_bound(x: ti.types.ndarray(), v: ti.types.ndarray()):
     for u in x:
         for i in ti.static(range(3)):
             if x[u][i] < -1:
@@ -299,7 +302,8 @@ def substep():
 def run_aot():
     cwd = os.getcwd()
     if cwd != SCRIPT_PATH:
-        raise RuntimeError(f'AOT must be done in the script path {SCRIPT_PATH}')
+        raise RuntimeError(
+            f'AOT must be done in the script path {SCRIPT_PATH}')
     dir_name = os.path.join('..', 'shaders', 'aot', 'implicit_fem')
     shutil.rmtree(dir_name, ignore_errors=True)
     pathlib.Path(dir_name).mkdir(parents=True, exist_ok=False)
@@ -325,7 +329,7 @@ def run_aot():
 
 
 @ti.kernel
-def convert_to_field(x: ti.any_arr(), y: ti.template()):
+def convert_to_field(x: ti.types.ndarray(), y: ti.template()):
     for I in ti.grouped(x):
         y[I] = x[I]
 
