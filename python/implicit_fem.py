@@ -453,7 +453,7 @@ def generate_data_header_file_for_aot():
                 f.write(str(t(x[i])) + ',')
             f.write('};\n')
 
-    data_header_path = get_rel_path('..', 'include', 'data.h')
+    data_header_path = get_rel_path('..', 'include', 'mesh_data.h')
     if os.path.exists(data_header_path):
         os.remove(data_header_path)
     with open(data_header_path, 'w') as f:
