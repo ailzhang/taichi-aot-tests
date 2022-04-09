@@ -11,7 +11,7 @@
 #include <map>
 #include <vector>
 
-#include "mesh_data.h"
+#include "fem_app.h"
 
 #define ALOGI(fmt, ...)                                                  \
   ((void)__android_log_print(ANDROID_LOG_INFO, "TaichiTest", "%s: " fmt, \

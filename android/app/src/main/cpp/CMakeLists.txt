@@ -26,5 +26,6 @@ target_include_directories(taichi-test-native PUBLIC ${TAICHI_REPO_DIR}/external
 target_include_directories(taichi-test-native PUBLIC ${TAICHI_REPO_DIR}/external/eigen/)
 target_include_directories(taichi-test-native PUBLIC ${TAICHI_REPO_DIR}/external/spdlog/include/)
 target_include_directories(taichi-test-native PUBLIC ${TAICHI_REPO_DIR}/external/VulkanMemoryAllocator/include/)
+target_include_directories(taichi-test-native PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../include/)
 
 target_link_libraries(taichi-test-native android log m vulkan taichi_export_core)
